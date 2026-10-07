@@ -1,4 +1,12 @@
-hello
-world
-thi s
-line
+D=1;JGT
+1;JMP
+D=1
+@10
+
+DA=1
+
+M=1+0
+
+0;JLA
+
+;JLE
