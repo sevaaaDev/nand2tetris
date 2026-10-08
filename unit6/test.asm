@@ -3,10 +3,9 @@ D=1;JGT
 D=1
 @10
 
-DA=1
+AD=1
 
-M=1+0
+M=D+A
 
-0;JLA
+0;JLT
 
-;JLE

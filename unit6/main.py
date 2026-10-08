@@ -26,10 +26,47 @@ JUMP_TO_BIN = {
     "JMP": "111",
 }
 
-# TODO: add map of comp
 COMP_TO_BIN = {
+    "0": "0101010",
     "1": "0111111",
+    "-1": "0111010",
+    "D": "0001100",
+    "M": "1110000",
+    "A": "0110000",
+    "!D": "0001101",
+    "!M": "1110001",
+    "!A": "0110001",
+    "-D": "0001111",
+    "-M": "1110011",
+    "-A": "0110011",
+    "D+1": "0011111",
+    "M+1": "1110111",
+    "A+1": "0110111",
+    "D-1": "0001110",
+    "M-1": "1110010",
+    "A-1": "0110010",
+    "D+A": "0000010",
+    "D+M": "1000010",
+    "D-A": "0010011",
+    "D-M": "1010011",
+    "A-D": "0000111",
+    "M-D": "1000111",
+    "D&A": "0000000",
+    "D&M": "1000000",
+    "D|A": "0010101",
+    "D|M": "1010101",
 }
+
+class Symbol_Table():
+    def __init__(self):
+        self.next_var_addr = 16
+        self.sym = {}
+
+    def get(self, label: str) -> int:
+        if label not in self.sym:
+            self.sym[label] = self.next_var_addr
+            self.next_var_addr += 1
+        return self.sym[label]
 
 class Token(ABC):
     def __init__(self, val:str):
@@ -49,15 +86,19 @@ class AddrToken(Token):
 
 class Command(ABC):
     @abstractmethod
-    def toBinary(self, symbol: dict[str, int]) -> str:
+    def toBinary(self, symbol_table: Symbol_Table) -> str:
         pass
 
 class AddrCmd(Command):
     def __init__(self, sym: str):
         self.sym = sym
 
-    def toBinary(self, symbol: dict[str, int]) -> str:
-        return '0' + 'pass'
+    def toBinary(self, symbol_table: Symbol_Table) -> str:
+        try:
+            addr: int = int(self.sym)
+        except:
+            addr: int = symbol_table.get(self.sym)
+        return '0' + bin(addr & 0xFFFF)[2:].rjust(15, "0")
 
 class CompCmd(Command):
     def __init__(self, dest: str, comp: str, jump: str):
@@ -65,7 +106,7 @@ class CompCmd(Command):
         self.comp = comp
         self.jump = jump
 
-    def toBinary(self, symbol: dict[str, int]) -> str:
+    def toBinary(self, symbol_table: Symbol_Table) -> str:
         return '111' + COMP_TO_BIN[self.comp] + DEST_TO_BIN[self.dest] + JUMP_TO_BIN[self.jump]
 
 class Lexer():
@@ -77,7 +118,7 @@ class Lexer():
         if len(self.line) == 0:
             return None
         if self.line[0] == "@":
-            val = self.line[1: -1]
+            val = self.line[1:]
             self.line = ""
             return AddrToken(val)
         if "=" in self.line:
@@ -126,7 +167,7 @@ def parseComp(line: str) -> Command:
 
     return CompCmd(dest.val, comp.val, jump.val)
 
-def parseAddr(line: str) -> Command:
+def parseAddr(line: str) -> Command | None:
     tok = Lexer(line).peek()
     return AddrCmd(tok.val) if isinstance(tok, AddrToken) else None
 
@@ -135,7 +176,7 @@ def parse(line: str, symbol_table: dict[str, int]) -> Command:
     return cmd if cmd is not None else parseComp(line)
 
 def main():
-    symbol_table: dict[str, int] = {}
+    symbol_table: Symbol_Table = Symbol_Table()
     err: bool = False
     with open(sys.argv[1], 'r') as file:
         commands: list[Command] = []
