@@ -68,6 +68,9 @@ class Symbol_Table():
             self.next_var_addr += 1
         return self.sym[label]
 
+    def set(self, label: str, val: int) -> None:
+        self.sym[label] = val
+
 class Token(ABC):
     def __init__(self, val:str):
         self.val = val
@@ -94,10 +97,11 @@ class AddrCmd(Command):
         self.sym = sym
 
     def toBinary(self, symbol_table: Symbol_Table) -> str:
+        addr: int
         try:
-            addr: int = int(self.sym)
+            addr = int(self.sym)
         except:
-            addr: int = symbol_table.get(self.sym)
+            addr = symbol_table.get(self.sym)
         return '0' + bin(addr & 0xFFFF)[2:].rjust(15, "0")
 
 class CompCmd(Command):
@@ -175,6 +179,15 @@ def parse(line: str, symbol_table: dict[str, int]) -> Command:
     cmd = parseAddr(line)
     return cmd if cmd is not None else parseComp(line)
 
+def parseLabel(line: str) -> str:
+    splitted = line[1:].split(')', 1)
+    if len(splitted) == 1:
+        raise SyntaxError(f"invalid label '{line}'")
+    label, rest = splitted
+    if len(rest) != 0:
+        raise SyntaxError(f"invalid label '{line}'")
+    return label
+
 def main():
     symbol_table: Symbol_Table = Symbol_Table()
     err: bool = False
@@ -184,17 +197,16 @@ def main():
             line = line.strip()
             if len(line) == 0:
                 continue
-            if line[0] == '(':
-                # addLabel
-                continue
             try:
+                if line[0] == '(':
+                    label = parseLabel(line)
+                    symbol_table.set(label, line_num-1)
+                    continue
                 cmd: Command = parse(line, symbol_table)
                 commands.append(cmd)
             except SyntaxError as e:
                 print(f"{line_num}: error: " + str(e))
-                err = True
-        if err:
-            return
+                return
         for cmd in commands:
             print(cmd.toBinary(symbol_table))
 

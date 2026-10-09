@@ -9,3 +9,8 @@ M=D+A
 
 0;JLT
 
+(label)
+
+@label
+
+(label
