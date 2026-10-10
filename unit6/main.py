@@ -227,8 +227,10 @@ def main():
         commands: list[Command] = []
         line_num: int = 1
         for line in file:
+            if '//' in line:
+                line, rest = line.split('//', 1)
             line = line.strip()
-            if len(line) == 0 or line[0:2] == "//":
+            if len(line) == 0:
                 continue
             try:
                 if line[0] == '(':
