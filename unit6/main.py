@@ -7,6 +7,11 @@
 import sys
 from abc import ABC, abstractmethod
 
+# TODO: handle inline comment
+# TODO: make macro
+        # D=M[100]
+        # D;JGT Label
+
 DEST_TO_BIN = {
     "": "000",
     "A": "100",
