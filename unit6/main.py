@@ -11,9 +11,10 @@ DEST_TO_BIN = {
     "": "000",
     "A": "100",
     "AD": "110",
+    "AM": "101",
     "ADM": "111",
     "D": "010",
-    "DM": "011",
+    "MD": "011",
     "M": "001",
 }
 JUMP_TO_BIN = {
@@ -24,6 +25,7 @@ JUMP_TO_BIN = {
     "JLE": "110",
     "JGE": "011",
     "JMP": "111",
+    "JNE": "101",
 }
 
 COMP_TO_BIN = {
@@ -60,7 +62,32 @@ COMP_TO_BIN = {
 class Symbol_Table():
     def __init__(self):
         self.next_var_addr = 16
-        self.sym = {}
+        self.sym = {
+            "R0": 0,
+            "R1": 1,
+            "R1": 1,
+            "R2": 2,
+            "R3": 3,
+            "R4": 4,
+            "R5": 5,
+            "R6": 6,
+            "R7": 7,
+            "R8": 8,
+            "R9": 9,
+            "R10": 10,
+            "R11": 11,
+            "R12": 12,
+            "R13": 13,
+            "R14": 14,
+            "R15": 15,
+            "SCREEN": 16384,
+            "KBD": 24576,
+            "SP": 0,
+            "LCL": 1,
+            "ARG": 2,
+            "THIS": 3,
+            "THAT": 4,
+        }
 
     def get(self, label: str) -> int:
         if label not in self.sym:
@@ -193,9 +220,10 @@ def main():
     err: bool = False
     with open(sys.argv[1], 'r') as file:
         commands: list[Command] = []
-        for line_num, line in enumerate(file, start=1):
+        line_num: int = 1
+        for line in file:
             line = line.strip()
-            if len(line) == 0:
+            if len(line) == 0 or line[0:2] == "//":
                 continue
             try:
                 if line[0] == '(':
@@ -207,6 +235,7 @@ def main():
             except SyntaxError as e:
                 print(f"{line_num}: error: " + str(e))
                 return
+            line_num += 1
         for cmd in commands:
             print(cmd.toBinary(symbol_table))
 
