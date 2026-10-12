@@ -1,11 +1,6 @@
-# we can set addr symbol to unresolved
-# then after finish parsing, we traverse the ast and resolve the symbol
-
-# command is class
-# method eval()
-
 import sys
 from abc import ABC, abstractmethod
+import macro
 
 # TODO: handle inline comment
 # TODO: make macro
@@ -222,29 +217,34 @@ def parseLabel(line: str) -> str:
 
 def main():
     symbol_table: Symbol_Table = Symbol_Table()
-    err: bool = False
+    commands: list[Command] = []
+    lines: list[str] = []
     with open(sys.argv[1], 'r') as file:
-        commands: list[Command] = []
-        line_num: int = 1
+        # TODO: handle line number (maybe use tuple)
+        # TODO: remove comment, clean up line
+        # TODO: expand macro
         for line in file:
             if '//' in line:
                 line, rest = line.split('//', 1)
             line = line.strip()
             if len(line) == 0:
                 continue
-            try:
-                if line[0] == '(':
-                    label = parseLabel(line)
-                    symbol_table.set(label, line_num-1)
-                    continue
-                cmd: Command = parse(line, symbol_table)
-                commands.append(cmd)
-            except SyntaxError as e:
-                print(f"{line_num}: error: " + str(e))
-                return
-            line_num += 1
-        for cmd in commands:
-            print(cmd.toBinary(symbol_table))
+            lines.append(line)
+    line_num: int = 1
+    for line in lines:
+        try:
+            if line[0] == '(':
+                label = parseLabel(line)
+                symbol_table.set(label, line_num-1)
+                continue
+            cmd: Command = parse(line, symbol_table)
+            commands.append(cmd)
+        except SyntaxError as e:
+            print(f"{line_num}: error: " + str(e))
+            return
+        line_num += 1
+    for cmd in commands:
+        print(cmd.toBinary(symbol_table))
 
 def test():
     line = "@addr"
