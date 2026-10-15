@@ -218,20 +218,20 @@ def parseLabel(line: str) -> str:
 def main():
     symbol_table: Symbol_Table = Symbol_Table()
     commands: list[Command] = []
-    lines: list[str] = []
+    lines: list[tuple[int, str]] = []
     with open(sys.argv[1], 'r') as file:
-        # TODO: handle line number (maybe use tuple)
-        # TODO: remove comment, clean up line
-        # TODO: expand macro
+        line_num = 0
         for line in file:
+            line_num += 1
             if '//' in line:
                 line, rest = line.split('//', 1)
             line = line.strip()
             if len(line) == 0:
                 continue
-            lines.append(line)
-    line_num: int = 1
-    for line in lines:
+            expanded = macro.macro_expand(line)
+            for line in expanded:
+                lines.append((line_num, line))
+    for (line_num, line) in lines:
         try:
             if line[0] == '(':
                 label = parseLabel(line)
@@ -240,8 +240,8 @@ def main():
             cmd: Command = parse(line, symbol_table)
             commands.append(cmd)
         except SyntaxError as e:
-            print(f"{line_num}: error: " + str(e))
-            return
+            print(f"{line_num}: error: " + str(e), file=sys.stderr)
+            sys.exit(1)
         line_num += 1
     for cmd in commands:
         print(cmd.toBinary(symbol_table))
