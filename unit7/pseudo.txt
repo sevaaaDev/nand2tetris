@@ -1,0 +1,54 @@
+CMD := STACK_CMD | LOGIC_MATH_CMD
+
+STACK_CMD := [pop | push] SEGMENT DIGIT
+SEGMENT := local | argument | this | that | static | constant | temp | pointer 
+
+LOGIC_MATH_CMD:= OP
+OP  := add | sub | neg | or | and | eq | lt | gt 
+
+=====
+
+interface command:
+    semantic_check()
+    to_asm()
+
+lexer():
+    word, rest = line.split(" ", 1)
+    line = rest
+    match word:
+        case "push":
+            return Token(push)
+        case "pop":
+            return Token(pop)
+        case "local" | "argument" | ...:
+            return Token(segment, word)
+        case n if n.isDigit():
+            return Token(digit, word)
+        case "add" | "sub" | ...:
+            return Token(op, word)
+
+
+parser():
+    tok = lexer()
+    if tok == pop or push:
+        return parse_stack_cmd()
+    return parse_logic_math_cmd()
+
+main():
+    err = false
+    cmds = []
+    for line in file:
+        try:
+            cmd = parser(line)
+            cmd.semantic_check()
+            cmds.append(cmd)
+        except SyntaxErr as e:
+            print("error syntax", stderr)
+            err = true
+        except SemanticErr as e:
+            print("error semantic", stderr)
+            err = true
+    if err:
+        exit(1)
+    for c in cmds:
+        print(c.to_asm())
