@@ -15,10 +15,8 @@ M=D+A
 
 @11 // hello
 
-D=M[15];JGT label
 
 D;JGT label
 
 M[122]=D;JMP
 M[500]=D+A;JMP
-
