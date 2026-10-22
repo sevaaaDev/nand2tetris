@@ -1,6 +1,7 @@
 import tokens
 import sys
 from parser import parse
+from lexer import MOCK_Lexer
 
 MOCK_LINES = [
     [(tokens.PUSH, "push"), (tokens.SEGMENT, "constant"), (tokens.DIGIT, "17")],
@@ -9,7 +10,7 @@ MOCK_LINES = [
     [(tokens.POP, "pop"), (tokens.SEGMENT, "constant"), (tokens.DIGIT, "0")],
 ]
 
-def main():
+def main() -> None:
     cmds = []
     err = False
     for tokens in MOCK_LINES:

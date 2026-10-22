@@ -1,4 +1,9 @@
+from abc import ABC, abstractmethod
 class Command():
+    def __init__(self, data: list[str]) -> None:
+        pass
+
+    @abstractmethod
     def to_asm(self) -> str:
         pass
 
@@ -12,9 +17,9 @@ M=D
 @SP
 M=M+1
 """
-    def __init__(self, segment, arg):
-        self.segment = segment
-        self.arg = arg
+    def __init__(self, data: list[str]) -> None:
+        self.segment = data[0]
+        self.arg = data[1]
 
     def to_asm(self) -> str:
         return f"// push {self.segment} {self.arg}"
@@ -27,14 +32,14 @@ M=M+1
 
 class PopCommand(Command):
     ASM_POP = """"""
-    def __init__(self, segment, arg):
-        self.segment = segment
-        self.arg = arg
+    def __init__(self, data: list[str]):
+        self.segment = data[0]
+        self.arg = data[1]
 
     def to_asm(self) -> str:
         return f"// pop {self.segment} {self.arg}"
 
-    def semantic_check(self) -> bool:
+    def semantic_check(self) -> None:
         if self.segment == "pointer":
             if self.arg != "0" or self.arg != "1":
                 raise Exception(f"pointer must be 1 or 0, cant be '{self.arg}'")
@@ -43,9 +48,9 @@ class PopCommand(Command):
         return 
 
 class ArithmeticCommand(Command):
-    TYPE_TO_ASM = {}
-    def __init__(self, type):
-        self.type = type
+    TYPE_TO_ASM: dict[str, str] = {}
+    def __init__(self, data: list[str]):
+        self.type = data[0]
 
     def to_asm(self) -> str:
         return f"// {self.type}"

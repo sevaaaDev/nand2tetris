@@ -10,3 +10,5 @@ FUNCTION = "FUNCTION"
 RETURN = "RETURN"
 CALL = "CALL"
 
+Token = tuple[str, str]
+
