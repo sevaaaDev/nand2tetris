@@ -3,6 +3,9 @@ import sys
 from parser import parse
 from lexer import MOCK_Lexer
 
+# TODO: test parser
+# TODO: implement lexer
+# TODO: implement to_asm()
 MOCK_LINES = [
     [(tokens.PUSH, "push"), (tokens.SEGMENT, "constant"), (tokens.DIGIT, "17")],
     [(tokens.PUSH, "push"), (tokens.DIGIT, "constant"), (tokens.DIGIT, "10")],
@@ -11,6 +14,7 @@ MOCK_LINES = [
 ]
 
 def main() -> None:
+    # TODO: handle line num and comment
     cmds = []
     err = False
     for tokens in MOCK_LINES:
