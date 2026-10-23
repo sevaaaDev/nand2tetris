@@ -1,11 +1,11 @@
 import tokens
-from lexer import Lexer
+from lexer import ALexer
 from command import Command, PushCommand, PopCommand, ArithmeticCommand
 
 PUSH_RULES = (PushCommand, [tokens.PUSH, tokens.SEGMENT, tokens.DIGIT])
 POP_RULES = (PopCommand, [tokens.POP, tokens.SEGMENT, tokens.DIGIT])
 ARITH_RULES = (ArithmeticCommand, [tokens.ARITHMETIC])
-def parse_cmd(lex: Lexer, rules: tuple[type[Command], list[str]]) -> Command:
+def parse_cmd(lex: ALexer, rules: tuple[type[Command], list[str]]) -> Command:
     data: list[str] = []
     for r in rules[1]:
         tok = lex.peek()
@@ -63,7 +63,7 @@ def parse_cmd(lex: Lexer, rules: tuple[type[Command], list[str]]) -> Command:
 #         raise SyntaxError(f"expected arithmetic command, got '{tok[1]}'")
 #     return ArithmeticCommand(lex.eat()[1])
 
-def parse(lex: Lexer) -> Command:
+def parse(lex: ALexer) -> Command:
     tok = lex.peek()
     if tok is None:
         raise SyntaxError("expecting")

@@ -1,38 +1,49 @@
 import tokens
 import sys
 from parser import parse
-from lexer import MOCK_Lexer
+from lexer import Lexer
+from command import SemanticError
 
 # TODO: test parser
-# TODO: implement lexer
 # TODO: implement to_asm()
-MOCK_LINES = [
-    [(tokens.PUSH, "push"), (tokens.SEGMENT, "constant"), (tokens.DIGIT, "17")],
-    [(tokens.PUSH, "push"), (tokens.DIGIT, "constant"), (tokens.DIGIT, "10")],
-    [(tokens.ARITHMETIC, "add")],
-    [(tokens.POP, "pop"), (tokens.SEGMENT, "constant"), (tokens.DIGIT, "0")],
-]
 
-def main() -> None:
-    # TODO: handle line num and comment
+def translate(filename: str):
     cmds = []
     err = False
-    for tokens in MOCK_LINES:
-        lexer = MOCK_Lexer(tokens)
-        try:
-            cmd = parse(lexer)
-            cmds.append(cmd)
-        except Exception as e:
-            print(f"syntax error: {str(e)}", file=sys.stderr)
-    for c in cmds:
-        try:
-            c.semantic_check()
-        except Exception as e:
-            print(f"semantic error: {str(e)}", file=sys.stderr)
-            err = True
+    linenum = 0
+    with open(filename) as f:
+        for line in f:
+            linenum+=1
+            if "//" in line:
+                line, _ = line.split("//", 1)
+            line = line.strip()
+            if len(line) == 0:
+                continue
+            lexer = Lexer(line)
+            try:
+                cmd = parse(lexer)
+                cmd.semantic_check()
+                cmds.append(cmd)
+            except SyntaxError as e:
+                print(f"{filename}:{linenum}: syntax error: {str(e)}", file=sys.stderr)
+                print(f"\t{line}", file=sys.stderr)
+                err = True
+            except SemanticError as e:
+                print(f"{filename}:{linenum}: semantic error: {str(e)}", file=sys.stderr)
+                print(f"\t{line}", file=sys.stderr)
+                err = True
     if err:
         sys.exit(1)
     for c in cmds:
         print(c.to_asm())
+    
+def main() -> None:
+    if len(sys.argv) < 2:
+        print(f"{sys.argv[0]}: missing filename", file=sys.stderr)
+        print(f"Example:", file=sys.stderr)
+        print(f"\tpython {sys.argv[0]} filename.vm", file=sys.stderr)
+        sys.exit(1)
+    filename = sys.argv[1]
+    translate(filename)
 
 main()
