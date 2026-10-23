@@ -26,7 +26,7 @@ class MOCK_Lexer(ALexer):
         self.tokens = tokens
 
     def lex(self) -> Token | None:
-        return self.tokens.pop(0)
+        return self.tokens.pop(0) if len(self.tokens) != 0 else None
 
 class Lexer(ALexer):
     SEGMENT = ["local" , "argument" , "this" , "that" , "static" , "constant" , "temp" , "pointer"]
