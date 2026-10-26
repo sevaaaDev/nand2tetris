@@ -29,7 +29,7 @@ M=M+1
 
     def semantic_check(self) -> None:
         if self.segment == "pointer":
-            if self.arg != "0" or self.arg != "1":
+            if self.arg != "0" and self.arg != "1":
                 raise SemanticError(f"pointer must be 1 or 0, cant be '{self.arg}'")
         return
 
@@ -44,7 +44,7 @@ class PopCommand(Command):
 
     def semantic_check(self) -> None:
         if self.segment == "pointer":
-            if self.arg != "0" or self.arg != "1":
+            if self.arg != "0" and self.arg != "1":
                 raise SemanticError(f"pointer must be 1 or 0, cant be '{self.arg}'")
         if self.segment == "constant":
             raise SemanticError("you cant pop into constant")
