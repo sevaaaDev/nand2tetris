@@ -1,5 +1,6 @@
 import tokens
 import sys
+from pathlib import Path
 from parser import parse
 from lexer import Lexer
 from command import SemanticError
@@ -35,7 +36,7 @@ def translate(filename: str):
     if err:
         sys.exit(1)
     for c in cmds:
-        print(c.to_asm())
+        print(c.to_asm(Path(filename).stem))
     
 def main() -> None:
     if len(sys.argv) < 2:

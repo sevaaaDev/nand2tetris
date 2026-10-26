@@ -4,7 +4,7 @@ STACK_CMD := [pop | push] SEGMENT DIGIT
 SEGMENT := local | argument | this | that | static | constant | temp | pointer 
 
 LOGIC_MATH_CMD:= OP
-OP  := add | sub | neg | or | and | eq | lt | gt 
+OP  := add | sub | neg | or | and | not | eq | lt | gt 
 
 =====
 

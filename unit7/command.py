@@ -25,7 +25,7 @@ class Command():
         pass
 
     @abstractmethod
-    def to_asm(self) -> str:
+    def to_asm(self, filename: str) -> str:
         pass
 
     def semantic_check(self) -> None:
@@ -64,7 +64,7 @@ D=A
 """
     def asm_load_pointer(self):
         return f"""
-@{"THIS" if self.arg == 0 else "THAT"}
+@{"THIS" if self.arg == "0" else "THAT"}
 D=M
 """
     def asm_load_static(self, filename: str):
@@ -72,7 +72,7 @@ D=M
 @{filename}.{self.arg}
 D=M
 """
-    def to_asm(self) -> str:
+    def to_asm(self, filename: str) -> str:
         match self.segment:
             case "constant":
                 load = self.asm_load_constant()
@@ -81,7 +81,7 @@ D=M
             case "pointer":
                 load = self.asm_load_pointer()
             case "static":
-                load = self.asm_load_static()
+                load = self.asm_load_static(filename)
             case _:
                 load = self.asm_load_ptr_offset()
 
@@ -135,7 +135,7 @@ M=D
 """
     def asm_pointer(self):
         return f"""
-@{"THIS" if self.arg == 0 else "THAT"}
+@{"THIS" if self.arg == "0" else "THAT"}
 D=A
 
 @R13
@@ -152,7 +152,7 @@ D=D+A
 M=D
 """
 
-    def to_asm(self) -> str:
+    def to_asm(self, filename: str) -> str:
         match self.segment:
             case "constant":
                 load = self.asm_constant()
@@ -161,7 +161,7 @@ M=D
             case "pointer":
                 load = self.asm_pointer()
             case "static":
-                load = self.asm_static()
+                load = self.asm_static(filename)
             case _:
                 load = self.asm_ptr()
         return f"// pop {self.segment} {self.arg} {load} {PopCommand.ASM_POP}"
@@ -174,11 +174,101 @@ M=D
             raise SemanticError("you cant pop into constant")
         return 
 
+def asm_math2(op: str):
+    def gen():
+        return f"""
+@R15
+D=A
+@R13
+M=D
+
+{PopCommand.ASM_POP}
+
+@R14
+D=A
+@R13
+M=D
+
+{PopCommand.ASM_POP}
+
+@R14
+D=M
+@R15
+D={op}
+
+{PushCommand.ASM_PUSH}
+"""
+    return gen
+
+def asm_math1(op: str):
+    def gen():
+        return f"""
+@R15
+D=A
+@R13
+M=D
+
+{PopCommand.ASM_POP}
+@R15
+D={op}
+
+{PushCommand.ASM_PUSH}
+"""
+    return gen
+
+eq_count=0
+def asm_math_cond(op: str):
+    def gen():
+        global eq_count
+        eq_count += 1
+        return f"""
+@R15
+D=A
+@R13
+M=D
+
+{PopCommand.ASM_POP}
+
+@R14
+D=A
+@R13
+M=D
+
+{PopCommand.ASM_POP}
+
+@R14
+D=M
+@R15
+D=D-M
+M=-1
+@equality{eq_count}
+D;{op}
+@R15
+M=0
+(equality{eq_count})
+@R15
+D=M
+
+{PushCommand.ASM_PUSH}
+"""
+    return gen
+
 class ArithmeticCommand(Command):
-    TYPE_TO_ASM: dict[str, str] = {}
+    TYPE_TO_ASM: dict[str, str] = {
+        "add": asm_math2("D+M"),
+        "sub": asm_math2("D-M"),
+        "and": asm_math2("D&M"),
+        "or":  asm_math2("D|M"),
+        "sub": asm_math2("D-M"),
+        "not": asm_math1("!M"),
+        "neg": asm_math1("-M"),
+        "eq": asm_math_cond("JEQ"),
+        "gt": asm_math_cond("JGT"),
+        "lt": asm_math_cond("JLT"),
+    }
     def __init__(self, data: list[str]):
         self.type = data[0]
 
-    def to_asm(self) -> str:
-        return f"// {self.type}"
+    def to_asm(self, filename: str) -> str:
+        return f"// {self.type} {ArithmeticCommand.TYPE_TO_ASM[self.type]()}"
         # return ArithmeticCommand.TYPE_TO_ASM[self.type]
