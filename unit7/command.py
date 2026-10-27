@@ -1,4 +1,8 @@
 from abc import ABC, abstractmethod
+from codegen import push, pop, Load, SEGMENT_LOADER, MATH_CMD
+from typing import Callable
+
+# TODO: refactor all this shit
 
 def asm_load_ptr(segment: str, offset: str) -> str:
     match segment:
@@ -85,7 +89,7 @@ D=M
             case _:
                 load = self.asm_load_ptr_offset()
 
-        return f"// push {self.segment} {self.arg} {load} {PushCommand.ASM_PUSH}"
+        return f"// push {self.segment} {self.arg}" + push(SEGMENT_LOADER[self.segment](Load.CONTENT, self.arg, filename))
 
     def semantic_check(self) -> None:
         if self.segment == "pointer":
@@ -164,7 +168,7 @@ M=D
                 load = self.asm_static(filename)
             case _:
                 load = self.asm_ptr()
-        return f"// pop {self.segment} {self.arg} {load} {PopCommand.ASM_POP}"
+        return f"// pop {self.segment} {self.arg}" + pop(SEGMENT_LOADER[self.segment](Load.ADDRESS, self.arg, filename))
 
     def semantic_check(self) -> None:
         if self.segment == "pointer":
@@ -270,5 +274,5 @@ class ArithmeticCommand(Command):
         self.type = data[0]
 
     def to_asm(self, filename: str) -> str:
-        return f"// {self.type} {ArithmeticCommand.TYPE_TO_ASM[self.type]()}"
+        return f"// {self.type}" + MATH_CMD[self.type]()
         # return ArithmeticCommand.TYPE_TO_ASM[self.type]
