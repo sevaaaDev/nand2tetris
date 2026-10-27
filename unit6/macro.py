@@ -47,7 +47,8 @@ def macro_expand(text: str) -> list[str]:
     captured = capture(text, [*"D=M[", Rules.any_until("]"), "]", ";", Rules.any_until("")])
     if captured is not None:
         return [f"@{captured[0]}", f"D=M;{captured[1]}"]
-    captured = capture(text, [Rules.any_until(";"), ";", Rules.any_until(" "), " ", Rules.any_until("")])
+    # BUG: below rules is too forgiving
+    ## captured = capture(text, [Rules.any_until(";"), ";", Rules.any_until(" "), " ", Rules.any_until("")])
     if captured is not None:
         return [f"@{captured[2]}", f"{captured[0]};{captured[1]}"]
     captured = capture(text, [*"M[", Rules.any_until("]"), *"]=", Rules.any_until("")])

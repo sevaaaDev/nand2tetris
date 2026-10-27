@@ -151,7 +151,6 @@ class Lexer():
             val, self.line = self.line.split("=", 1)
             return DestToken(val)
         if ";" in self.line:
-            breakpoint()
             self.line, val = self.line.split(";", 1)
             return JumpToken(val)
         return CompToken(self.line)
