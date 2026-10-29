@@ -1,7 +1,0 @@
-push constant 1
-push c 5
-add
-pop local 0
-push pointer 3
-// whatever
-pop pointer 3

@@ -5,8 +5,12 @@ from parser import parse
 from lexer import Lexer
 from command import SemanticError
 
-# TODO: test parser
 # TODO: implement to_asm()
+
+def error(msg: str, filename: str, linenum: int, line: str):
+    print(f"{filename}:{linenum}: {msg}", file=sys.stderr)
+    print(f"in expression:", file=sys.stderr)
+    print(f"\t{line}", file=sys.stderr)
 
 def translate(filename: str):
     cmds = []
@@ -26,12 +30,16 @@ def translate(filename: str):
                 cmd.semantic_check()
                 cmds.append(cmd)
             except SyntaxError as e:
-                print(f"{filename}:{linenum}: syntax error: {str(e)}", file=sys.stderr)
-                print(f"\t{line}", file=sys.stderr)
+                error(f"syntax error: {str(e)}", filename, linenum, line)
+                # print(f"{filename}:{linenum}: syntax error: {str(e)}", file=sys.stderr)
+                # print(f"in expression:", file=sys.stderr)
+                # print(f"\t{line}", file=sys.stderr)
                 err = True
             except SemanticError as e:
-                print(f"{filename}:{linenum}: semantic error: {str(e)}", file=sys.stderr)
-                print(f"\t{line}", file=sys.stderr)
+                error(f"semantic error: {str(e)}", filename, linenum, line)
+                # print(f"{filename}:{linenum}: semantic error: {str(e)}", file=sys.stderr)
+                # print(f"in expression:", file=sys.stderr)
+                # print(f"\t{line}", file=sys.stderr)
                 err = True
     if err:
         sys.exit(1)

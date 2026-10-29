@@ -5,6 +5,12 @@ from command import Command, PushCommand, PopCommand, ArithmeticCommand
 PUSH_RULES = (PushCommand, [tokens.PUSH, tokens.SEGMENT, tokens.DIGIT])
 POP_RULES = (PopCommand, [tokens.POP, tokens.SEGMENT, tokens.DIGIT])
 ARITH_RULES = (ArithmeticCommand, [tokens.ARITHMETIC])
+# FUNC_RULES = (, [tokens.FUNC, tokens.IDENT, tokens.DIGIT])
+# CALL_RULES = (, [tokens.CALL, tokens.IDENT, tokens.DIGIT])
+# RETURN_RULES = (, [tokens.RETURN])
+# IF_RULES = (, [tokens.IF, tokens.IDENT])
+# GOTO_RULES = (, [tokens.GOTO, tokens.IDENT])
+# LABEL_RULES = (, [tokens.LABEL, tokens.IDENT])
 def parse_cmd(lex: ALexer, rules: tuple[type[Command], list[str]]) -> Command:
     data: list[str] = []
     for r in rules[1]:

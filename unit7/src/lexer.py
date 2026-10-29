@@ -53,5 +53,17 @@ class Lexer(ALexer):
                 return (tokens.POP, word)
             case w if w in Lexer.MATH:
                 return (tokens.ARITHMETIC, word)
+            case "function":
+                return (tokens.FUNC, word)
+            case "call":
+                return (tokens.CALL, word)
+            case "return":
+                return (tokens.RETURN, word)
+            case "if-goto":
+                return (tokens.IF, word)
+            case "goto":
+                return (tokens.GOTO, word)
+            case "label":
+                return (tokens.LABEL, word)
             case _:
-                raise SyntaxError(f"invalid syntax: {word}")
+                return (tokens.IDENT, word)
