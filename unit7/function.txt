@@ -1,5 +1,17 @@
-return sequences:
+spec for the symbol:
+function$label = for label inside function (Foo.bar$loop)
+function = for function symbol (Foo.bar)
+function$ret.i = for each return addr after call command (Foo.bar$ret.1)
 
+================================
+
+function sequences:
+--------------------------------
+label functionname
+for i in nlocal do push constant 0; pop local i; end
+
+return sequences:
+--------------------------------
 endframe = LCL
 retaddr = *(endframe - 5)
 *ARG = pop()
@@ -11,6 +23,7 @@ retaddr = *(endframe - 5)
 goto retaddr
 
 call sequences:
+--------------------------------
 push $ret
 push *LCL
 push *ARG
@@ -19,4 +32,4 @@ push *THAT
 *ARG = *SP - 5 - nargs
 *LCL = *SP
 goto functionname
-(ret)
+(func$ret.i)

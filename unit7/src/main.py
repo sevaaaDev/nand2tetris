@@ -16,6 +16,7 @@ def translate(filename: str):
     cmds = []
     err = False
     linenum = 0
+    # TODO: make the lexer read the whole file
     with open(filename) as f:
         for line in f:
             linenum+=1

@@ -55,9 +55,48 @@ class ArithmeticCommand(Command):
         return f"// {self.type}" + MATH_CMD[self.type]()
         # return ArithmeticCommand.TYPE_TO_ASM[self.type]
 
-# class IfCommand(Command):
-# class LabelCommand(Command):
-# class GotoCommand(Command):
-# class FuncCommand(Command):
-# class CallCommand(Command):
-# class ReturnCommand(Command):
+class IfCommand(Command):
+    def __init__(self, data: list[str]):
+        self.label = data[1]
+
+    def to_asm(self, filename: str) -> str:
+        return f"// if-goto {self.label}"
+        pop(R14)
+        @R14
+        D=M+1
+        @{self.label}
+        D;JEQ
+
+class LabelCommand(Command):
+    def __init__(self, data: list[str]):
+        self.label = data[1]
+
+    def to_asm(self, filename: str) -> str:
+        return f"// label {self.label}"
+
+class GotoCommand(Command):
+    def __init__(self, data: list[str]):
+        self.label = data[1]
+
+    def to_asm(self, filename: str) -> str:
+        return f"// goto {self.label}"
+
+class FuncCommand(Command):
+    def __init__(self, data: list[str]):
+        self.name = data[1]
+        self.nlocal = data[2]
+
+    def to_asm(self, filename: str) -> str:
+        return f"// function {self.name} {self.nlocal}"
+
+class CallCommand(Command):
+    def __init__(self, data: list[str]):
+        self.name = data[1]
+        self.nargs = data[2]
+
+    def to_asm(self, filename: str) -> str:
+        return f"// call {self.name} {self.nargs}"
+
+class ReturnCommand(Command):
+    def to_asm(self, filename: str) -> str:
+        return f"// return"
