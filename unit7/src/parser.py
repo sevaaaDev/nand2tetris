@@ -31,62 +31,21 @@ def parse_function(lex: ALexer) -> Command:
     func: Command = parse_cmd(lex, FUNC_RULES)
     cmds: list[Command] = []
     while True:
-        cmd = parse(lex)
-        cmds.append(cmd)
-        if isinstance(cmd, command.ReturnCommand):
+        try:
+            cmd = parse(lex)
+            cmds.append(cmd)
+            if isinstance(cmd, command.ReturnCommand):
+                break
+        except EOFError:
             break
     func.body = cmds
     return func
 
 
-# def parse_push(lex: Lexer) -> Command:
-#     segment = ""
-#     digit = ""
-#     tok = lex.peek()
-#     if tok[0] != tokens.PUSH:
-#         raise SyntaxError(f"expected 'push', got '{tok[1]}'")
-#     lex.eat()
-
-#     tok = lex.peek()
-#     if tok[0] != tokens.SEGMENT:
-#         raise SyntaxError(f"expected SEGMENT, got '{tok[1]}'")
-#     segment = lex.eat()[1]
-
-#     tok = lex.peek()
-#     if tok[0] != tokens.DIGIT:
-#         raise SyntaxError(f"expected DIGIT, got '{tok[1]}'")
-#     digit = lex.eat()[1]
-#     return PushCommand(segment, digit)
-
-# def parse_pop(lex: Lexer):
-#     segment = ""
-#     digit = ""
-#     tok = lex.peek()
-#     if tok[0] != tokens.POP:
-#         raise SyntaxError(f"expected 'push', got '{tok[1]}'")
-#     lex.eat()
-
-#     tok = lex.peek()
-#     if tok[0] != tokens.SEGMENT:
-#         raise SyntaxError(f"expected SEGMENT, got '{tok[1]}'")
-#     segment = lex.eat()[1]
-
-#     tok = lex.peek()
-#     if tok[0] != tokens.DIGIT:
-#         raise SyntaxError(f"expected DIGIT, got '{tok[1]}'")
-#     digit = lex.eat()[1]
-#     return PopCommand(segment, digit)
-
-# def parse_arith(lex: Lexer):
-#     tok = lex.peek()
-#     if tok[0] != tokens.ARITHMETIC:
-#         raise SyntaxError(f"expected arithmetic command, got '{tok[1]}'")
-#     return ArithmeticCommand(lex.eat()[1])
-
 def parse(lex: ALexer) -> Command:
     tok = lex.peek()
     if tok is None:
-        raise SyntaxError("expecting")
+        raise EOFError()
     match tok[0]:
         case tokens.PUSH:
             return parse_cmd(lex, PUSH_RULES)
@@ -95,7 +54,7 @@ def parse(lex: ALexer) -> Command:
         case tokens.ARITHMETIC:
             return parse_cmd(lex, ARITH_RULES)
         case tokens.FUNC:
-            return parse_cmd(lex, FUNC_RULES)
+            return parse_function(lex)
         case tokens.CALL:
             return parse_cmd(lex, CALL_RULES)
         case tokens.RETURN:

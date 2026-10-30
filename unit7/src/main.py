@@ -2,7 +2,7 @@ import tokens
 import sys
 from pathlib import Path
 from parser import parse
-from lexer import Lexer
+from lexer import Lexer, Scanner
 from command import SemanticError
 
 # TODO: implement to_asm()
@@ -16,31 +16,21 @@ def translate(filename: str):
     cmds = []
     err = False
     linenum = 0
-    # TODO: make the lexer read the whole file
     with open(filename) as f:
-        for line in f:
-            linenum+=1
-            if "//" in line:
-                line, _ = line.split("//", 1)
-            line = line.strip()
-            if len(line) == 0:
-                continue
-            lexer = Lexer(line)
+        filestr = f.read()
+        lexer = Lexer(Scanner(filestr))
+        while True:
             try:
                 cmd = parse(lexer)
                 cmd.semantic_check()
                 cmds.append(cmd)
+            except EOFError as e:
+                break
             except SyntaxError as e:
-                error(f"syntax error: {str(e)}", filename, linenum, line)
-                # print(f"{filename}:{linenum}: syntax error: {str(e)}", file=sys.stderr)
-                # print(f"in expression:", file=sys.stderr)
-                # print(f"\t{line}", file=sys.stderr)
+                error(f"syntax error: {str(e)}", filename, lexer.linenum, lexer.line)
                 err = True
             except SemanticError as e:
-                error(f"semantic error: {str(e)}", filename, linenum, line)
-                # print(f"{filename}:{linenum}: semantic error: {str(e)}", file=sys.stderr)
-                # print(f"in expression:", file=sys.stderr)
-                # print(f"\t{line}", file=sys.stderr)
+                error(f"semantic error: {str(e)}", filename, lexer.linenum, lexer.line)
                 err = True
     if err:
         sys.exit(1)

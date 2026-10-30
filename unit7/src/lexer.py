@@ -28,15 +28,52 @@ class MOCK_Lexer(ALexer):
     def lex(self) -> Token | None:
         return self.tokens.pop(0) if len(self.tokens) != 0 else None
 
+class Scanner:
+    def __init__(self, filestr: str):
+        self.content = filestr
+
+    def nextLine(self) -> str:
+        line = ""
+        while len(line) == 0:
+            if len(self.content) == 0:
+                return ""
+            splitted: tuple[str, str] | list[str] = (self.content, "")
+            if "\n" in self.content:
+                splitted = self.content.split("\n", 1)
+            line, self.content = splitted
+            if "//" in line:
+                line, _ = line.split("//", 1)
+            line = line.strip()
+
+        return line
+
 class Lexer(ALexer):
     SEGMENT = ["local" , "argument" , "this" , "that" , "static" , "constant" , "temp" , "pointer"]
     MATH = ["add" , "sub" , "neg" , "eq" , "gt" , "lt" , "or" , "and" , "not"]
-    def __init__(self, line: str):
+    def __init__(self, f: Scanner):
         super().__init__()
-        self.line = line
+        self.f = f
+        self._linenum = 0
+        self._CURRENT_LINE = ""
+        self.line = ""
+        self.advanceLine()
+
+    @property
+    def current_line(self):
+        return self._CURRENT_LINE
+
+    @property
+    def linenum(self):
+        return self._linenum
+
+    def advanceLine(self):
+        self._CURRENT_LINE = self.f.nextLine()
+        self.line = self._CURRENT_LINE
+        self._linenum+=1
 
     def lex(self) -> Token | None:
         if len(self.line) == 0:
+            self.advanceLine()
             return None
         splitted: tuple[str, str] | list[str] = (self.line, "")
         if " " in self.line:
