@@ -1,6 +1,8 @@
 import tokens
 from lexer import ALexer
 import command
+from command import Command, FuncCommand
+from typing import overload
 
 PUSH_RULES = (command.PushCommand, [tokens.PUSH, tokens.SEGMENT, tokens.DIGIT])
 POP_RULES = (command.PopCommand, [tokens.POP, tokens.SEGMENT, tokens.DIGIT])
@@ -12,7 +14,13 @@ IF_RULES = (command.IfCommand, [tokens.IF, tokens.IDENT])
 GOTO_RULES = (command.GotoCommand, [tokens.GOTO, tokens.IDENT])
 LABEL_RULES = (command.LabelCommand, [tokens.LABEL, tokens.IDENT])
 
-def parse_cmd(lex: ALexer, rules: tuple[type[Command], list[str]]) -> Command:
+@overload
+def parse_cmd(lex: ALexer, rules: tuple[type[FuncCommand], list[str]]) -> FuncCommand: ...
+
+@overload
+def parse_cmd(lex: ALexer, rules: tuple[type[Command], list[str]]) -> Command: ...
+
+def parse_cmd(lex, rules) -> Command:
     data: list[str] = []
     for r in rules[1]:
         tok = lex.peek()
@@ -28,7 +36,7 @@ def parse_cmd(lex: ALexer, rules: tuple[type[Command], list[str]]) -> Command:
 
 # TODO: this only work if lexer loop thru whole file.
 def parse_function(lex: ALexer) -> Command:
-    func: Command = parse_cmd(lex, FUNC_RULES)
+    func: command.FuncCommand = parse_cmd(lex, FUNC_RULES)
     cmds: list[Command] = []
     while True:
         try:

@@ -1,4 +1,4 @@
-from lexer import MOCK_Lexer
+from lexer import MOCK_Lexer 
 from parser import parse
 import command
 import tokens
@@ -16,7 +16,7 @@ def test_parser_bad_input():
 
 def test_parser_no_input():
     lex = MOCK_Lexer([])
-    with pytest.raises(SyntaxError):
+    with pytest.raises(EOFError):
         parse(lex)
 
 def test_parse_function():

@@ -4,6 +4,9 @@ function = for function symbol (Foo.bar)
 function$ret.i = for each return addr after call command (Foo.bar$ret.1)
 
 ================================
+if-goto:
+*R14 = pop()
+*R14+1;JEQ
 
 function sequences:
 --------------------------------
