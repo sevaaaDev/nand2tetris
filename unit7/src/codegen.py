@@ -22,9 +22,11 @@ M=M+1
 """
 
 def pop(load):
-    """the pop mechanism take memory address from R13. it will pop the data to that address"""
+    """the pop mechanism take memory address from D register. it will pop the data to that address"""
     return f"""
 {load}
+@R13
+M=D
 
 @SP
 M=M-1
@@ -55,8 +57,6 @@ D=M
 def load_address():
     return """
 D=A
-@R13
-M=D
 """
 
 class Load(Enum):

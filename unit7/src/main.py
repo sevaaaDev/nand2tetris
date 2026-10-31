@@ -4,6 +4,7 @@ from pathlib import Path
 from parser import parse
 from lexer import Lexer, Scanner
 from command import SemanticError
+from typing import TextIO
 
 # TODO: implement to_asm()
 
@@ -12,7 +13,7 @@ def error(msg: str, filename: str, linenum: int, line: str):
     print(f"in expression:", file=sys.stderr)
     print(f"\t{line}", file=sys.stderr)
 
-def translate(filename: str, output):
+def translate(filename: str, output: TextIO):
     cmds = []
     err = False
     linenum = 0
@@ -36,6 +37,17 @@ def translate(filename: str, output):
         sys.exit(1)
     for c in cmds:
         c.to_asm(Path(filename).stem, "", output)
+
+def write_init(o: TextIO):
+    o.write(""" // Bootstrap
+@256
+D=A
+@SP
+M=D
+
+@Sys.init
+0;JMP
+""")
     
 def main() -> None:
     if len(sys.argv) < 2:
@@ -46,6 +58,7 @@ def main() -> None:
     filename = sys.argv[1]
     outfile = "out.asm"
     with open(outfile, mode="w") as o:
+        write_init(o)
         translate(filename, o)
 
 main()

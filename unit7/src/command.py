@@ -75,10 +75,10 @@ class IfCommand(Command):
     def to_asm(self, filename: str, funcname: str, o: TextIO) -> None:
         o.write(f"// if-goto {self.label}"
         + pop(seg_any(Load.ADDRESS, "R14"))
-        + """@R14
-D=M+1
+        + f"""@R14
+D=M
 @{funcname}${self.label}
-D;JEQ
+D;JNE
 """)
 
 class LabelCommand(Command):
@@ -109,7 +109,7 @@ class FuncCommand(Command):
     def to_asm(self, filename: str, funcname: str, o: TextIO) -> None:
         o.write(f"""// function {self.name} {self.nlocal}
 ({self.name})
-{"\n".join([(push(seg_constant(Load.CONTENT, "0")) + pop(seg_local(Load.ADDRESS, str(i)))) for i in range(int(self.nlocal))])}
+{"\n".join([push(seg_constant(Load.CONTENT, "0")) for i in range(int(self.nlocal))])}
 """)
         for c in self.body:
             c.to_asm(filename, self.name, o)
@@ -128,7 +128,7 @@ class CallCommand(Command):
         + push(seg_any(Load.CONTENT, "ARG"))
         + push(seg_any(Load.CONTENT, "THIS"))
         + push(seg_any(Load.CONTENT, "THAT"))
-        + """@SP
+        + f"""@SP
 D=M
 @5
 D=D-A
@@ -164,7 +164,7 @@ class ReturnCommand(Command):
 @LCL
 D=M
 @5
-A=D-5
+A=D-A
 D=M
 
 @R15
