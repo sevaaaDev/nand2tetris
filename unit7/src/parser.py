@@ -74,4 +74,5 @@ def parse(lex: ALexer) -> Command:
         case tokens.LABEL:
             return parse_cmd(lex, LABEL_RULES)
         case _:
+            lex.eat()
             raise SyntaxError(f"this should not happen: {tok[0]} fail to match any rules")
