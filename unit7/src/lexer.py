@@ -56,7 +56,7 @@ class Lexer(ALexer):
         self._linenum = 0
         self._CURRENT_LINE = ""
         self.line = ""
-        self.advanceLine()
+        self.readyToAdvance = True
 
     @property
     def current_line(self):
@@ -72,8 +72,11 @@ class Lexer(ALexer):
         self._linenum+=1
 
     def lex(self) -> Token | None:
-        if len(self.line) == 0:
+        if self.readyToAdvance:
+            self.readyToAdvance = False
             self.advanceLine()
+        if len(self.line) == 0:
+            self.readyToAdvance = True
             return None
         splitted: tuple[str, str] | list[str] = (self.line, "")
         if " " in self.line:
