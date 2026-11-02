@@ -5,8 +5,7 @@ from parser import parse
 from lexer import Lexer, Scanner
 from command import SemanticError
 from typing import TextIO
-
-# TODO: implement to_asm()
+import argparse
 
 def error(msg: str, filename: str, linenum: int, line: str):
     print(f"{filename}:{linenum}: {msg}", file=sys.stderr)
@@ -28,10 +27,10 @@ def translate(filename: str, output: TextIO):
             except EOFError as e:
                 break
             except SyntaxError as e:
-                error(f"syntax error: {str(e)}", filename, lexer.linenum, lexer.line)
+                error(f"syntax error: {str(e)}", filename, lexer.linenum, lexer.current_line)
                 err = True
             except SemanticError as e:
-                error(f"semantic error: {str(e)}", filename, lexer.linenum, lexer.line)
+                error(f"semantic error: {str(e)}", filename, lexer.linenum, lexer.current_line)
                 err = True
     if err:
         sys.exit(1)
@@ -50,15 +49,18 @@ M=D
 """)
     
 def main() -> None:
-    if len(sys.argv) < 2:
-        print(f"{sys.argv[0]}: missing filename", file=sys.stderr)
-        print(f"Example:", file=sys.stderr)
-        print(f"\tpython {sys.argv[0]} filename.vm", file=sys.stderr)
-        sys.exit(1)
-    filename = sys.argv[1]
-    outfile = "out.asm"
+    parse = argparse.ArgumentParser()
+    parse.add_argument('files', nargs='+')
+    parse.add_argument('-o', '--output', default='out.asm')
+    args = parse.parse_args()
+
+    files = args.files
+    outfile = args.output
+    # TODO: handle multi file
+    # main.py file1 file2 file3 -o out.asm
     with open(outfile, mode="w") as o:
         write_init(o)
-        translate(filename, o)
+        for filename in files:
+            translate(filename, o)
 
 main()
