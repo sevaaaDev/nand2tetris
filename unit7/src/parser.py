@@ -34,16 +34,15 @@ def parse_cmd(lex, rules) -> Command:
         raise SyntaxError(f"expected newline, got something else")
     return rules[0](data)
 
-# TODO: this only work if lexer loop thru whole file.
 def parse_function(lex: ALexer) -> Command:
     func: command.FuncCommand = parse_cmd(lex, FUNC_RULES)
     cmds: list[Command] = []
     while True:
+        if lex.peek() is None or lex.peek()[0] == tokens.FUNC:
+            break
         try:
             cmd = parse(lex)
             cmds.append(cmd)
-            if isinstance(cmd, command.ReturnCommand):
-                break
         except EOFError:
             break
     func.body = cmds
