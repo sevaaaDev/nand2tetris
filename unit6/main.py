@@ -84,6 +84,9 @@ class Symbol_Table():
             "THAT": 4,
         }
 
+    def is_exist(self, label: str) -> bool:
+        return label in self.sym
+
     def get(self, label: str) -> int:
         if label not in self.sym:
             self.sym[label] = self.next_var_addr
@@ -195,6 +198,8 @@ def parseComp(line: str) -> Command:
 
 def parseAddr(line: str) -> Command | None:
     tok = Lexer(line).peek()
+    if len(tok.val) == 0:
+        raise SyntaxError("invalid address")
     return AddrCmd(tok.val) if isinstance(tok, AddrToken) else None
 
 def parse(line: str, symbol_table: dict[str, int]) -> Command:
@@ -206,11 +211,12 @@ def parseLabel(line: str) -> str:
     if len(splitted) == 1:
         raise SyntaxError(f"invalid label '{line}'")
     label, rest = splitted
-    if len(rest) != 0:
+    if len(label) == 0 or len(rest) != 0:
         raise SyntaxError(f"invalid label '{line}'")
     return label
 
 def main():
+    err = False
     symbol_table: Symbol_Table = Symbol_Table()
     commands: list[Command] = []
     lines: list[tuple[int, str]] = []
@@ -230,14 +236,18 @@ def main():
         try:
             if line[0] == '(':
                 label = parseLabel(line)
+                if symbol_table.is_exist(label):
+                    raise SyntaxError(f"jump label '{label}' is already defined")
                 symbol_table.set(label, line_num-1)
                 continue
             cmd: Command = parse(line, symbol_table)
             commands.append(cmd)
         except SyntaxError as e:
             print(f"{line_num}: error: " + str(e), file=sys.stderr)
-            sys.exit(1)
+            err = True
         line_num += 1
+    if err:
+        sys.exit(1)
     for cmd in commands:
         print(cmd.toBinary(symbol_table))
 
