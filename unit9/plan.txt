@@ -1,0 +1,22 @@
+ball is object
+changing:
+- pos (x,y)
+- speed (x,y)
+constant:
+- size
+method:
+Ball move()
+Ball handleCollision()
+bool isCollideWith(pos, size) // TODO: padel and ball have same function
+
+padel is object
+changing:
+- pos (x,y)
+constant:
+- size
+method:
+bool isOutsideArena()
+bool isCollideWith(pos, size)
+
+while true:
+ball.move().handleCollision(gameState)

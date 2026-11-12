@@ -1,0 +1,67 @@
+class World {
+    field Ball ball;
+    field Paddle paddle;
+    field GameState gstate;
+    static int T_PADDLE;
+    static int T_TOP;
+    static int T_SIDE;
+    static Rect TOP;
+    static Rect LEFT;
+    static Rect RIGHT;
+    static Rect BOTTOM;
+    function void init() {
+        let T_PADDLE = 0;
+        let T_TOP = 1;
+        let T_SIDE = 2;
+        let TOP = Rect.new(Vec.new(0, -16), 511, 16);
+        let LEFT = Rect.new(Vec.new(-16, 0), 16, 255);
+        let RIGHT = Rect.new(Vec.new(511, 0), 16, 255);
+        let BOTTOM = Rect.new(Vec.new(0, 255), 511, 0);
+        return;
+    }
+    constructor World new() {
+        let paddle = Paddle.new();
+        let ball = Ball.new();
+        let gstate = GameState.new();
+        return this;
+    }
+    method void run() {
+        var char key;
+        while (true) {
+            let key = Keyboard.keyPressed();
+            do onKeyPress(key);
+            do advance();
+            do draw();
+            // TODO: we must find way to convert framerate to speed per second
+            do Sys.wait(33);
+        }
+        return;
+    }
+    method void advance() {
+        do ball.move();
+        do ball.handleCollision(gstate, paddle.bound(), T_PADDLE);
+        do ball.handleCollision(gstate, TOP, T_TOP);
+        do ball.handleCollision(gstate, LEFT, T_SIDE);
+        do ball.handleCollision(gstate, RIGHT, T_SIDE);
+        return;
+    }
+
+    method void onKeyPress(char key) {
+        if (key = 130) { // left
+            do paddle.move(true);
+        }
+        if (key = 132) { // right
+            do paddle.move(false);
+        }
+        return;
+    }
+
+    method void draw() {
+        do Screen.clearScreen();
+        // row is 0 to 22
+        // TODO: score draw
+        do ball.draw();
+        do paddle.draw();
+        return;
+    }
+}

@@ -1,0 +1,21 @@
+class Paddle {
+    field Rect r;
+    field Vec lspeed;
+    field Vec rspeed;
+    constructor Paddle new() {
+        let r = Rect.new(Vec.new(256, 245), 48, 8);
+        let lspeed = Vec.new(-8, 0);
+        let rspeed = Vec.new(8, 0);
+        return this;
+    }
+    method void move(boolean leftDir) {
+        if (leftDir) {
+            do r.move(lspeed);
+        } else {
+            do r.move(rspeed);
+        }
+        return;
+    }
+    method Rect bound() {return r;}
+    method void draw() {do r.draw(); return;}
+}

@@ -1,0 +1,72 @@
+class Rect {
+    field Vec pos;
+    field int width;
+    field int height;
+
+    constructor Rect new(Vec p, int w, int h) {
+        let pos = p;
+        let width = w;
+        let height = h;
+        return this;
+    }
+
+    method Vec pos() {
+        return pos;
+    }
+    method int width() {
+        return width;
+    }
+    method int height() {
+        return height;
+    }
+
+    method void move(Vec speed) {
+        do pos.add(speed);
+        return;
+    }
+
+    method boolean isCollideWith(Rect that) {
+        return that.isCollideWithHelp(pos, width, height);
+    }
+
+    method boolean isCollideWithHelp(Vec thatPos, int thatWidth, int thatHeight) {
+        if (((pos.x() < (thatPos.x() + thatWidth)) & ((pos.x() + width) > thatPos.x())) &
+            ((pos.y() < (thatPos.y() + thatHeight)) & ((pos.y() + height) > thatPos.y()))) {
+            return true;
+        }
+        return false;
+    }
+
+    method void draw() {
+        var int x;
+        var int y;
+        var int endX;
+        var int endY;
+        let x = pos.x();
+        let y = pos.y();
+        let endX = x + width;
+        let endY = y + height;
+        if (endX > 511) {
+            let endX = 511;
+        }
+        if (x < 0) {
+            let x = 0;
+        }
+        if (endY > 255) {
+            let endY = 255;
+        }
+        if (y < 0) {
+            let y = 0;
+        }
+        if (endX > x & endY > y) {
+            do Screen.drawRectangle(x, y, endX, endY);
+        }
+        return;
+    }
+
+    method void dispose() {
+        do Memory.deAlloc(pos);
+        do Memory.deAlloc(this);
+        return;
+    }
+}

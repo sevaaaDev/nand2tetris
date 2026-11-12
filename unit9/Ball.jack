@@ -1,0 +1,72 @@
+class Ball {
+    static int count;
+    field Vec speed;
+    field Rect r;
+    constructor Ball new() {
+        var Vec pos;
+        var int size;
+        let pos = Vec.new(64, 228);
+        let size = 8;
+        let r = Rect.new(pos, size, size);
+
+        let speed = Vec.new(2, -8);
+
+        let count = 0;
+        return this;
+    }
+    method Rect bound() {
+        return r;
+    }
+    method void move() {
+        do r.move(speed);
+        return;
+    }
+    method void bounce(Rect that, int type) {
+        // TODO: might be better if constant frow world is a function
+        var Vec ballOrigin;
+        var Vec paddleOrigin;
+        if (type = 0) {
+            let ballOrigin = r.pos();
+            let paddleOrigin = that.pos();
+            if (ballOrigin.x() < (paddleOrigin.x() + 16)) {
+                do speed.setY(-5);
+                do speed.setX(-5);
+                return;
+            }
+            if (ballOrigin.x() < (paddleOrigin.x() + 32)) {
+                do speed.setY(-8);
+                do speed.setX(0);
+                return;
+            }
+            if (ballOrigin.x() < (paddleOrigin.x() + 48)) {
+                do speed.setY(-5);
+                do speed.setX(5);
+                return;
+            }
+        }
+        if (type = 1) {
+            do speed.setY(-speed.y());
+        }
+        if (type = 2) {
+            do speed.setX(-speed.x());
+        }
+        return;
+    }
+
+    // TODO: handle game state each bounce
+    method void handleCollision(GameState gstate, Rect that, int type) {
+        if (r.isCollideWith(that)) {
+            let count = count + 1;
+            do bounce(that, type);
+            do r.move(speed);
+            if (type = 0) { // paddle
+                // gstate
+            }
+        }
+        return;
+    }
+    method void draw() {
+        do r.draw();
+        return;
+    }
+}
