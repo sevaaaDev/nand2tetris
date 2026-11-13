@@ -1,3 +1,31 @@
 class GameState {
-    constructor GameState new() {return this;}
+    field int player;
+    field int enemy;
+    constructor GameState new() {
+        let player = 0;
+        let enemy = 0;
+        return this;
+    }
+    method void incPlayer() {
+        let player = player + 1;
+        return;
+    }
+    method void incEnemy() {
+        let enemy = enemy + 1;
+        return;
+    }
+    method void draw() {
+        var String str;
+        let str = "Enemy: ";
+        do Output.moveCursor(0, 0);
+        do Output.printString(str);
+        do Output.printInt(enemy);
+        do str.dispose();
+        let str = "Player: ";
+        do Output.moveCursor(22, 0);
+        do Output.printString(str);
+        do Output.printInt(player);
+        do str.dispose();
+        return;
+    }
 }

@@ -1,5 +1,4 @@
 class Ball {
-    static int count;
     field Vec speed;
     field Rect r;
     constructor Ball new() {
@@ -11,7 +10,6 @@ class Ball {
 
         let speed = Vec.new(2, -8);
 
-        let count = 0;
         return this;
     }
     method Rect bound() {
@@ -25,43 +23,56 @@ class Ball {
         // TODO: might be better if constant frow world is a function
         var Vec ballOrigin;
         var Vec paddleOrigin;
+        var int dyCenter;
+        var int dySide;
+        let dyCenter = 8;
+        let dySide = 5;
+        if (speed.y() > 0) {
+            let dyCenter = -8;
+            let dySide = -5;
+        }
         if (type = 0) {
             let ballOrigin = r.pos();
             let paddleOrigin = that.pos();
             if (ballOrigin.x() < (paddleOrigin.x() + 16)) {
-                do speed.setY(-5);
+                do speed.setY(dySide);
                 do speed.setX(-5);
                 return;
             }
             if (ballOrigin.x() < (paddleOrigin.x() + 32)) {
-                do speed.setY(-8);
+                do speed.setY(dyCenter);
                 do speed.setX(0);
                 return;
             }
             if (ballOrigin.x() < (paddleOrigin.x() + 48)) {
-                do speed.setY(-5);
+                do speed.setY(dySide);
                 do speed.setX(5);
                 return;
             }
-        }
-        if (type = 1) {
-            do speed.setY(-speed.y());
         }
         if (type = 2) {
             do speed.setX(-speed.x());
         }
         return;
     }
+    method void reset(boolean up) {
+        do r.setPos(256, 128);
+        if (up) {
+            do speed.setY(-4);
+        } else {
+            do speed.setY(4);
+        }
+        do speed.setX(0);
+        return;
+    }
 
-    // TODO: handle game state each bounce
     method void handleCollision(GameState gstate, Rect that, int type) {
-        if (r.isCollideWith(that)) {
-            let count = count + 1;
+        if (~(r.isCollideWith(that))) {
+            return;
+        }
+        if ((type = 0) | (type = 2)) {
             do bounce(that, type);
             do r.move(speed);
-            if (type = 0) { // paddle
-                // gstate
-            }
         }
         return;
     }

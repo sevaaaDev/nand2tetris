@@ -1,9 +1,11 @@
 class World {
     field Ball ball;
     field Paddle paddle;
+    field Paddle enemy;
     field GameState gstate;
     static int T_PADDLE;
     static int T_TOP;
+    static int T_BOTTOM;
     static int T_SIDE;
     static Rect TOP;
     static Rect LEFT;
@@ -12,15 +14,17 @@ class World {
     function void init() {
         let T_PADDLE = 0;
         let T_TOP = 1;
+        let T_BOTTOM = 3;
         let T_SIDE = 2;
         let TOP = Rect.new(Vec.new(0, -16), 511, 16);
         let LEFT = Rect.new(Vec.new(-16, 0), 16, 255);
         let RIGHT = Rect.new(Vec.new(511, 0), 16, 255);
-        let BOTTOM = Rect.new(Vec.new(0, 255), 511, 0);
+        let BOTTOM = Rect.new(Vec.new(0, 255), 511, 16);
         return;
     }
     constructor World new() {
-        let paddle = Paddle.new();
+        let paddle = Paddle.new(Vec.new(256, 236), 48, 8);
+        let enemy = Paddle.new(Vec.new(256, 16), 48, 8);
         let ball = Ball.new();
         let gstate = GameState.new();
         return this;
@@ -32,17 +36,36 @@ class World {
             do onKeyPress(key);
             do advance();
             do draw();
+            do checkGame();
             // TODO: we must find way to convert framerate to speed per second
             do Sys.wait(33);
         }
         return;
     }
+    method void checkGame() {
+        var Vec bPos;
+        var Rect bBound;
+        let bBound = ball.bound();
+        let bPos = bBound.pos();
+        if (bPos.y() > 255) {
+            do ball.reset(false);
+        }
+        if (bPos.y() < 0) {
+            do ball.reset(true);
+        }
+        // TODO: move paddle reset
+        // TODO: inc point
+        return;
+    }
     method void advance() {
         do ball.move();
         do ball.handleCollision(gstate, paddle.bound(), T_PADDLE);
-        do ball.handleCollision(gstate, TOP, T_TOP);
+        // do ball.handleCollision(gstate, TOP, T_TOP);
+        // do ball.handleCollision(gstate, BOTTOM, T_BOTTOM);
         do ball.handleCollision(gstate, LEFT, T_SIDE);
         do ball.handleCollision(gstate, RIGHT, T_SIDE);
+        do ball.handleCollision(gstate, enemy.bound(), T_PADDLE);
+        do enemy.autoMove(ball.bound());
         return;
     }
 
@@ -62,6 +85,8 @@ class World {
         // TODO: score draw
         do ball.draw();
         do paddle.draw();
+        do enemy.draw();
+        // do gstate.draw();
         return;
     }
 }

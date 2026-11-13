@@ -20,6 +20,11 @@ class Rect {
         return height;
     }
 
+    method void setPos(int x, int y) {
+        do pos.setX(x);
+        do pos.setY(y);
+        return;
+    } 
     method void move(Vec speed) {
         do pos.add(speed);
         return;

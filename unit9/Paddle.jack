@@ -2,8 +2,8 @@ class Paddle {
     field Rect r;
     field Vec lspeed;
     field Vec rspeed;
-    constructor Paddle new() {
-        let r = Rect.new(Vec.new(256, 245), 48, 8);
+    constructor Paddle new(Vec pos, int w, int h) {
+        let r = Rect.new(pos, w, h);
         let lspeed = Vec.new(-8, 0);
         let rspeed = Vec.new(8, 0);
         return this;
@@ -18,4 +18,19 @@ class Paddle {
     }
     method Rect bound() {return r;}
     method void draw() {do r.draw(); return;}
+    method void autoMove(Rect ball) {
+        var Vec ballPos;
+        var Vec paddlePos;
+        let ballPos = ball.pos();
+        let paddlePos = r.pos();
+        if ((ballPos.x()+4) > (paddlePos.x() + r.width())) {
+            do move(false);
+            return;
+        }
+        if (ballPos.x() < paddlePos.x()) {
+            do move(true);
+            return;
+        }
+        return;
+    }
 }
