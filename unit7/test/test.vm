@@ -1,5 +1,6 @@
-function Foo.main 1
-    push constant 17
-    pop local 0
-    push constant 1
-    return
+push constant 7
+pop pointer 7
+pop constant 1
+call foo
+po op
+return
