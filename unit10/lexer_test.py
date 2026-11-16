@@ -22,11 +22,16 @@ def test_complex():
 def test_string():
     lex = Lexer('"string insdide"')
     assert lex.lex()[0] == token.STRING
-    lex = Lexer('"string insdide')
-    assert lex.lex()[0] == token.STRING
 
+def test_again():
+    lex = Lexer('if (x = "hello") { return 1; }')
+    tok = lex.lex()
+    while tok is not None:
+        print(tok)
+        tok = lex.lex()
 
 
 test_basic()
 test_complex()
 test_string()
+test_again()

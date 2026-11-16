@@ -3,12 +3,12 @@ def is_char(c: str) -> bool:
     return c.isalnum() or c == "_"
 
 def is_string(c: str) -> bool:
-    return c != '"' and c != "\n"
+    return c != '"' and c != "\n" and c != ""
 
 class Lexer():
     def __init__(self, filestr: str):
         self.filestr = filestr
-        self.cursor = 0;
+        self.cursor = 0
         return
 
     def hasMoreChar(self):
@@ -27,14 +27,16 @@ class Lexer():
         # THE char need peeking else gets eaten from the previous consume
         while (self.hasMoreChar()):
             c: str = self.nextChar()
-            if c == " ":
-                continue
-            # BUG: make the string return as token.STRING. ignore quotes
             if c == '"':
                 while is_string(self.peek()):
                     c = self.nextChar()
                     tok += c
+                if self.peek() != '"':
+                    raise SyntaxError("missing quotes for string")
+                self.nextChar()
                 return (token.STRING, tok)
+            if c == " ":
+                continue
             if c in token.symbol_map:
                 return (token.symbol_map[c], c)
             if c.isdigit():
