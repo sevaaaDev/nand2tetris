@@ -24,7 +24,6 @@ class Lexer():
 
     def lex(self) -> str:
         tok: str = ""
-        # THE char need peeking else gets eaten from the previous consume
         while (self.hasMoreChar()):
             c: str = self.nextChar()
             if c == '"':
@@ -35,7 +34,7 @@ class Lexer():
                     raise SyntaxError("missing quotes for string")
                 self.nextChar()
                 return (token.STRING, tok)
-            if c == " ":
+            if c == " " or c == '\n':
                 continue
             if c in token.symbol_map:
                 return (token.symbol_map[c], c)
@@ -53,8 +52,4 @@ class Lexer():
                 if tok in token.keyword_map:
                     return (token.keyword_map[tok], tok)
                 return (token.IDENTIFIER, tok)
-
-
-
-
-
+            raise SyntaxError(f"invalid char: {c}")
