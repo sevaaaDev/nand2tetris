@@ -53,3 +53,4 @@ class Lexer():
                     return (token.keyword_map[tok], tok)
                 return (token.IDENTIFIER, tok)
             raise SyntaxError(f"invalid char: {c}")
+        return ("EOF", "")
