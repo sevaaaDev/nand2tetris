@@ -1,4 +1,4 @@
-import token
+import tokens
 def is_char(c: str) -> bool:
     return c.isalnum() or c == "_"
 
@@ -26,6 +26,7 @@ class Lexer():
         tok: str = ""
         while (self.hasMoreChar()):
             c: str = self.nextChar()
+            # TODO: handle comment // comment /* comment */
             if c == '"':
                 while is_string(self.peek()):
                     c = self.nextChar()
@@ -33,24 +34,24 @@ class Lexer():
                 if self.peek() != '"':
                     raise SyntaxError("missing quotes for string")
                 self.nextChar()
-                return (token.STRING, tok)
+                return (tokens.STRING, tok)
             if c == " " or c == '\n':
                 continue
-            if c in token.symbol_map:
-                return (token.symbol_map[c], c)
+            if c in tokens.symbol_map:
+                return (tokens.symbol_map[c], c)
             if c.isdigit():
                 tok += c
                 while self.peek().isdigit():
                     c = self.nextChar()
                     tok += c
-                return (token.INTEGER, tok)
+                return (tokens.INTEGER, tok)
             if is_char(c):
                 tok += c
                 while is_char(self.peek()):
                     c = self.nextChar()
                     tok += c
-                if tok in token.keyword_map:
-                    return (token.keyword_map[tok], tok)
-                return (token.IDENTIFIER, tok)
+                if tok in tokens.keyword_map:
+                    return (tokens.keyword_map[tok], tok)
+                return (tokens.IDENTIFIER, tok)
             raise SyntaxError(f"invalid char: {c}")
         return ("EOF", "")

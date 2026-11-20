@@ -1,12 +1,13 @@
 from lexer import Lexer
-import token
+import tokens
 
 class OutputWriter:
     def __init__(self):
         self._indent = 0
 
     def print(self, text):
-        print("\t" * self._indent + str(text))
+        # print("\t" * self._indent + str(text))
+        pass
     def indent(self):
         self._indent += 1
 
@@ -14,8 +15,8 @@ class OutputWriter:
         self._indent -= 1
 
 class Parser:
-    TYPE = (token.INT, token.CHAR, token.BOOLEAN, token.IDENTIFIER)
-    OP = (token.PLUS, token.MINUS, token.STAR, token.SLASH, token.AMPERSAND, token.PIPE, token.LESS, token.GREATER, token.EQUAL)
+    TYPE = (tokens.INT, tokens.CHAR, tokens.BOOLEAN, tokens.IDENTIFIER)
+    OP = (tokens.PLUS, tokens.MINUS, tokens.STAR, tokens.SLASH, tokens.AMPERSAND, tokens.PIPE, tokens.LESS, tokens.GREATER, tokens.EQUAL)
     def __init__(self, lexer: Lexer):
         self.lexer = lexer
         self.lastToken = None
@@ -50,15 +51,15 @@ class Parser:
         return res
 
     def main(self):
-        self.expectRule(self.jack_class, "expecting a class definition")
+        return self.expectRule(self.jack_class, "expecting a class definition")
 
     def jack_class(self):
-        if not self.check(token.CLASS):
+        if not self.check(tokens.CLASS):
             return
         self.eat()
         self.owriter.print("class")
-        self.expect(token.IDENTIFIER)
-        self.expect(token.LEFT_BRACE)
+        self.expect(tokens.IDENTIFIER)
+        self.expect(tokens.LEFT_BRACE)
         self.owriter.indent()
         self.jack_classVarDec()
         self.jack_subroutineDec()
@@ -66,52 +67,52 @@ class Parser:
         return True
 
     def jack_classVarDec(self):
-        if not self.check(token.STATIC, token.FIELD):
+        if not self.check(tokens.STATIC, tokens.FIELD):
             return
         self.owriter.print("class var declaration")
-        while self.check(token.STATIC, token.FIELD):
+        while self.check(tokens.STATIC, tokens.FIELD):
             self.eat()
             self._var_dec()
-            self.expect(token.SEMICOLON)
+            self.expect(tokens.SEMICOLON)
         return True
 
     def jack_subroutineDec(self):
-        if not self.check(token.CONSTRUCTOR, token.METHOD, token.FUNCTION):
+        if not self.check(tokens.CONSTRUCTOR, tokens.METHOD, tokens.FUNCTION):
             return
         self.owriter.print("subroutine declaration")
-        while self.check(token.CONSTRUCTOR, token.METHOD, token.FUNCTION):
+        while self.check(tokens.CONSTRUCTOR, tokens.METHOD, tokens.FUNCTION):
             self.eat()
-            self.expect(*Parser.TYPE, token.VOID)
-            self.expect(token.IDENTIFIER)
-            self.expect(token.LEFT_PAREN)
+            self.expect(*Parser.TYPE, tokens.VOID)
+            self.expect(tokens.IDENTIFIER)
+            self.expect(tokens.LEFT_PAREN)
             self.owriter.indent()
             self.jack_paramList()
             self.owriter.deindent()
-            self.expect(token.RIGHT_PAREN)
+            self.expect(tokens.RIGHT_PAREN)
             self.owriter.indent()
             self.expectRule(self.jack_subroutineBody, "expecting subroutine body")
             self.owriter.deindent()
         return True
 
     def jack_subroutineBody(self):
-        if not self.check(token.LEFT_BRACE):
+        if not self.check(tokens.LEFT_BRACE):
             return
         self.eat()
         self.owriter.print("subroutine body")
-        while self.check(token.VAR):
+        while self.check(tokens.VAR):
             self.eat()
             self._var_dec()
-            self.expect(token.SEMICOLON)
+            self.expect(tokens.SEMICOLON)
         self.jack_statements()
-        self.expect(token.RIGHT_BRACE)
+        self.expect(tokens.RIGHT_BRACE)
         return True
 
     def _var_dec(self):
         self.expect(*Parser.TYPE)
-        self.expect(token.IDENTIFIER)
-        while self.check(token.COMMA):
+        self.expect(tokens.IDENTIFIER)
+        while self.check(tokens.COMMA):
             self.eat()
-            self.expect(token.IDENTIFIER)
+            self.expect(tokens.IDENTIFIER)
             self.eat()
 
     def jack_paramList(self):
@@ -119,117 +120,105 @@ class Parser:
             return
         self.owriter.print("param list")
         self.eat()
-        self.expect(token.IDENTIFIER)
-        while self.check(token.COMMA):
+        self.expect(tokens.IDENTIFIER)
+        while self.check(tokens.COMMA):
             self.eat()
             self.expect(*Parser.TYPE)
-            self.expect(token.IDENTIFIER)
+            self.expect(tokens.IDENTIFIER)
         return True
 
     def jack_statements(self):
-        # if not self.check(token.LET, token.IF, token.WHILE, token.DO, token.RETURN):
+        # if not self.check(tokens.LET, tokens.IF, tokens.WHILE, tokens.DO, tokens.RETURN):
         #     return
+        if (self.jack_let() or self.jack_if() or self.jack_while() or self.jack_do() or self.jack_return()) is None:
+            return
         self.owriter.print("statements")
         self.owriter.indent()
         while self.jack_let() or self.jack_if() or self.jack_while() or self.jack_do() or self.jack_return():
             pass
         self.owriter.deindent()
-        # while self.check(token.LET, token.IF, token.WHILE, token.DO, token.RETURN):
-        #     tok = self.peek()[0]
-        #     self.eat()
-        #     match tok:
-        #         case t if t == token.LET:
-        #             self.jack_let()
-        #         case t if t == token.IF:
-        #             self.jack_if()
-        #         case t if t == token.WHILE:
-        #             self.jack_while()
-        #         case t if t == token.DO:
-        #             self.jack_do()
-        #         case t if t == token.RETURN:
-        #             self.jack_return()
+        return True
 
     def jack_let(self):
-        if not self.check(token.LET):
+        if not self.check(tokens.LET):
             return
         self.eat()
         self.owriter.print("let")
-        self.expect(token.IDENTIFIER)
-        if self.check(token.LEFT_BRACKET):
+        self.expect(tokens.IDENTIFIER)
+        if self.check(tokens.LEFT_BRACKET):
+            self.eat();
             self.expectRule(self.jack_expr, "expecting expression")
-            self.expect(token.RIGHT_BRACKET)
-        self.expect(token.EQUAL)
+            self.expect(tokens.RIGHT_BRACKET)
+        self.expect(tokens.EQUAL)
         self.expectRule(self.jack_expr, "expecting expression")
-        self.expect(token.SEMICOLON)
+        self.expect(tokens.SEMICOLON)
         return True
 
     def jack_if(self):
-        if not self.check(token.IF):
+        if not self.check(tokens.IF):
             return
         self.eat()
         self.owriter.print("if")
-        self.expect(token.LEFT_PAREN)
+        self.expect(tokens.LEFT_PAREN)
         self.expectRule(self.jack_expr, "expecting expression")
-        self.expect(token.RIGHT_PAREN)
-        self.expect(token.LEFT_BRACE)
+        self.expect(tokens.RIGHT_PAREN)
+        self.expect(tokens.LEFT_BRACE)
         self.expectRule(self.jack_statements, "expecting statements")
-        self.expect(token.RIGHT_BRACE)
-        self.expectRule(self.jack_statements, "expecting statements")
-        if self.check(token.ELSE):
+        self.expect(tokens.RIGHT_BRACE)
+        if self.check(tokens.ELSE):
             self.eat()
-            self.expect(token.LEFT_BRACE)
+            self.expect(tokens.LEFT_BRACE)
             self.expectRule(self.jack_statements, "expecting statements")
-            self.expect(token.RIGHT_BRACE)
+            self.expect(tokens.RIGHT_BRACE)
         return True
 
     def jack_while(self):
-        if not self.check(token.WHILE):
+        if not self.check(tokens.WHILE):
             return
         self.eat()
         self.owriter.print("while")
-        self.expect(token.LEFT_PAREN)
+        self.expect(tokens.LEFT_PAREN)
         self.expectRule(self.jack_expr, "expecting expression")
-        self.expect(token.RIGHT_PAREN)
-        self.expect(token.LEFT_BRACE)
+        self.expect(tokens.RIGHT_PAREN)
+        self.expect(tokens.LEFT_BRACE)
         self.expectRule(self.jack_statements, "expecting statements")
-        self.expect(token.RIGHT_BRACE)
-        self.expectRule(self.jack_statements, "expecting statements")
+        self.expect(tokens.RIGHT_BRACE)
         return True
 
     def jack_do(self):
-        if not self.check(token.DO):
+        if not self.check(tokens.DO):
             return
         self.eat()
         self.owriter.print("do")
         self.expectRule(self.jack_subroutineCall, "expecting subroutine call")
-        self.expect(token.SEMICOLON)
+        self.expect(tokens.SEMICOLON)
         return True
 
     def jack_return(self):
-        if not self.check(token.RETURN):
+        if not self.check(tokens.RETURN):
             return
         self.eat()
         self.owriter.print("return")
         self.jack_expr()
-        self.expect(token.SEMICOLON)
+        self.expect(tokens.SEMICOLON)
         return True
 
     def jack_subroutineCall(self):
-        if not self.check(token.IDENTIFIER):
+        if not self.check(tokens.IDENTIFIER):
             return
         self.eat()
-        if self.check(token.DOT):
+        if self.check(tokens.DOT):
             self.eat()
-            self.expect(token.IDENTIFIER)
-        self.expect(token.LEFT_PAREN)
+            self.expect(tokens.IDENTIFIER)
+        self.expect(tokens.LEFT_PAREN)
         self.jack_exprList()
-        self.expect(token.RIGHT_PAREN)
+        self.expect(tokens.RIGHT_PAREN)
         return True
 
     def jack_exprList(self):
         if self.jack_expr() is None:
             return
-        while self.check(token.COMMA):
+        while self.check(tokens.COMMA):
             self.eat()
             self.expectRule(self.jack_expr, "expecting expression")
         return True
@@ -248,32 +237,41 @@ class Parser:
     def jack_term(self):
         # TODO: this is wrong, if no match must return none
         self.owriter.print("term")
-        if self.check(token.INTEGER):
-            pass
-        if self.check(token.STRING):
-            pass
-        if self.check(token.TRUE):
-            pass
-        if self.check(token.FALSE):
-            pass
-        if self.check(token.NULL):
-            pass
-        if self.check(token.THIS):
-            pass
-        if self.check(token.IDENTIFIER):
+        if self.check(tokens.INTEGER):
             self.eat()
-            if self.check(token.LEFT_BRACKET):
+            return True
+        if self.check(tokens.STRING):
+            self.eat()
+            return True
+        if self.check(tokens.TRUE):
+            self.eat()
+            return True
+        if self.check(tokens.FALSE):
+            self.eat()
+            return True
+        if self.check(tokens.NULL):
+            self.eat()
+            return True
+        if self.check(tokens.THIS):
+            self.eat()
+            return True
+        if self.check(tokens.IDENTIFIER):
+            self.eat()
+            if self.check(tokens.LEFT_BRACKET):
+                self.eat()
                 self.expectRule(self.jack_expr, "expecting expression")
-                self.expect(token.RIGHT_BRACKET)
+                self.expect(tokens.RIGHT_BRACKET)
+            return True
         if self.jack_subroutineCall():
-            pass
-        if self.check(token.LEFT_PAREN):
+            return True
+        if self.check(tokens.LEFT_PAREN):
             self.eat()
             self.expectRule(self.jack_expr, "expecting expression")
-            self.expect(token.RIGHT_PAREN)
-        if self.check(token.MINUS) or self.check(token.NEGATE):
+            self.expect(tokens.RIGHT_PAREN)
+            return True
+        if self.check(tokens.MINUS) or self.check(tokens.NEGATE):
             self.eat()
             self.expectRule(self.jack_term, "expecting expression")
-        self.eat()
-        return True
+            return True
+        return 
 

@@ -1,30 +1,11 @@
 from lexer import Lexer
-import token
+import tokens
 
 def test_string():
-    lex = Lexer('"string insdide"')
-    assert lex.lex()[0] == token.STRING
+    assert tokens.STRING == Lexer('"hello world"').lex()[0]
 
-def test_again():
-    lex = Lexer('if (x = "hello") { return 1; }')
-    tok = lex.lex()
-    while tok is not None:
-        print(tok)
-        tok = lex.lex()
+# def test_comment():
+#     assert tokens.EOF == Lexer('/* comment out */').lex()[0]
+#     assert tokens.EOF == Lexer('// comment out').lex()[0]
+#     assert tokens.LET == Lexer('/* comment out */ let').lex()[0]
 
-def test_newline():
-    lex = Lexer("""
-if (x = 10) {
-    return 1;
-}""")
-    tok = lex.lex()
-    while tok is not None:
-        print(tok)
-        tok = lex.lex()
-
-
-test_string()
-print("test_again()")
-test_again()
-print("test_newline()")
-test_newline()
